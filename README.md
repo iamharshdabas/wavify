@@ -1,4 +1,4 @@
-# code2music
+# Wavify
 
 To install dependencies:
 

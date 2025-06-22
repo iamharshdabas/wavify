@@ -1,5 +1,5 @@
 {
-  "name": "code2music",
+  "name": "wavify",
   "module": "index.ts",
   "type": "module",
   "scripts": {
@@ -12,9 +12,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.0",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/wav": "^1.0.4"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "node-web-audio-api": "^1.0.4",
+    "wav": "^1.0.2"
   }
 }

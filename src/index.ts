@@ -1,140 +1,32 @@
-export type Note = {
-  midiNoteNumber: number
-  startTimeMs: number
-  durationMs: number
-  volumeAutomation: { timeOffsetMs: number; volume: number }[]
-}
+import { writeAudioBufferToWav } from "./audioGenerator"
+import { renderNotesToAudioBuffer } from "./audioRenderer"
+import { generateNotes } from "./textToNotes"
 
-const BANDS = {
-  base: 0,
-  midrange: 1,
-  treble: 2,
-} as const
+async function main() {
+  const inputString = `
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ac ultrices libero. Cras eu quam sagittis, pharetra metus sit amet, lobortis leo. Mauris eget mi leo. Pellentesque vitae sapien augue. Duis lacinia ante in elit interdum ullamcorper. Pellentesque vestibulum eget magna blandit feugiat. Proin et ligula convallis, tincidunt purus ut, consectetur tellus. Quisque laoreet ligula eu nisi scelerisque, blandit gravida velit pulvinar. Vestibulum at ante non arcu laoreet vulputate. Proin lectus nisi, imperdiet quis nunc in, viverra ullamcorper lacus. Aliquam nec aliquam ex. In consequat elementum nibh, non tincidunt neque aliquam mollis. Nullam odio purus, rutrum ut luctus eu, venenatis nec neque. Phasellus enim enim, scelerisque sit amet placerat vel, ultrices eu elit.
+Morbi lobortis ullamcorper risus, id iaculis leo convallis eget. Sed sollicitudin metus in vulputate maximus. Praesent id facilisis lacus. Donec sed faucibus nisl, a mattis nunc. Sed ac ullamcorper lorem. Vestibulum quis est in mi aliquam elementum in in ipsum. Phasellus pharetra ornare rutrum. Nunc at dictum dui. Curabitur scelerisque arcu nec aliquet commodo. Nullam facilisis sollicitudin velit ut pulvinar. Sed ut posuere velit, in hendrerit arcu. Phasellus ullamcorper risus hendrerit sodales varius. Sed fringilla pretium venenatis. Morbi eget consequat augue. Etiam consequat, mauris quis fringilla suscipit, libero lacus pharetra lacus, id aliquet mi felis nec sapien. Maecenas et magna scelerisque sem convallis rhoncus in quis justo.
+Quisque vitae nisi venenatis elit gravida faucibus tincidunt at dui. Aenean aliquam dolor orci, at aliquet risus rhoncus scelerisque. Donec tristique, arcu id pretium varius, massa est mollis mauris, ac iaculis mi sem a est. Vestibulum diam orci, scelerisque et efficitur non, interdum sit amet leo. Mauris efficitur placerat sapien at volutpat. Duis sagittis posuere quam, sed venenatis augue auctor tincidunt. Quisque sagittis tempus pharetra. Fusce molestie blandit lectus, non accumsan tellus varius iaculis. Quisque lacinia blandit mauris in interdum. Fusce ullamcorper lacinia risus vitae vestibulum. Nunc eros nisl, pellentesque vel ultrices et, lacinia a massa. In eget dictum nisi, sit amet aliquet metus. Donec ac justo sit amet lectus tincidunt egestas vel sit amet nisi. Nunc volutpat tellus sit amet mattis tempus. Nam faucibus felis vel metus rutrum ultrices.
+Etiam ultricies quam sem, non porttitor mauris interdum nec. Suspendisse potenti. Mauris laoreet leo felis, ut imperdiet dolor auctor in. Donec at maximus nibh. Duis non sagittis metus, ut viverra ante. Nam eleifend eros lorem, nec interdum elit laoreet in. Sed interdum odio non diam viverra, et ornare velit posuere. Nam dapibus sapien eget magna molestie, sed accumsan ipsum suscipit. Vivamus facilisis, leo a tempus vulputate, lectus eros pharetra augue, vel suscipit arcu sapien vitae velit. In rutrum est enim, a pharetra orci sollicitudin non. Duis aliquam mauris et dolor rutrum accumsan. Sed rutrum, lorem vel bibendum viverra, nibh purus gravida metus, at aliquet neque risus quis neque. Maecenas tincidunt, mi eget consequat imperdiet, turpis leo rutrum erat, in tristique massa quam a nunc. Vestibulum ornare libero et sem volutpat venenatis. Nulla efficitur ultricies lorem vel fermentum. Aenean eu venenatis lacus, ut vehicula tortor.
+Quisque egestas eget orci a rhoncus. Morbi lobortis, leo elementum ultrices finibus, mauris lacus rutrum magna, vehicula ultricies orci velit vitae ligula. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla cursus magna dui, vitae pretium sapien vulputate eget. Donec hendrerit risus vel lacus accumsan vehicula. Etiam erat neque, tincidunt vitae enim quis, egestas scelerisque magna. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam venenatis volutpat laoreet. Proin tempor lobortis congue. Maecenas semper scelerisque nulla ut mattis. Suspendisse commodo libero in ante fermentum, non tincidunt diam facilisis. Phasellus vel sapien felis.
+`
 
-// using c minor pentatonic for an r&b feel
-const MIDI_NOTE_NUMBERS: Record<keyof typeof BANDS, number[]> = {
-  base: [36, 39, 41, 43, 46], // C2, Eb2, F2, G2, Bb2
-  midrange: [60, 63, 65, 67, 70], // C4, Eb4, F4, G4, Bb4
-  treble: [84, 87, 89, 91, 94], // C6, Eb6, F6, G6, Bb6
-} as const
+  const sampleRate = 44100
+  const outputFileName = "generated_music_from_text.wav"
 
-/**
- * @module this will generate music notes
- * @param string a string of notes to be generated
- * @returns an array of Note objects
- */
-export function generateNotes(input: string): Note[] {
-  if (!input || input.length === 0 || typeof input !== "string") {
-    throw new Error("Input must be a non-empty string")
-  }
+  try {
+    console.log(`Generating audio notes from input string: "${inputString}"...`)
+    const notes = generateNotes(inputString) // Use your generateNotes function
+    console.log("Audio notes generated. Rendering to audio buffer...")
 
-  const binaryStrings = input.split(" ").map(toBinaryString)
-  const bands = getBands(binaryStrings.length)
+    const audioBuffer = await renderNotesToAudioBuffer(notes, sampleRate)
+    console.log("Audio buffer generated. Saving to WAV file...")
 
-  const notes = getNotes(binaryStrings, bands)
-  console.log(JSON.stringify(notes, null, 2))
-  return notes
-}
-
-function getNotes(binaryStrings: string[], bands: number[]): Note[] {
-  if (binaryStrings.length === 0 || bands.length === 0) {
-    throw new Error("Binary string and bands must not be empty")
-  }
-
-  if (binaryStrings.length !== bands.length) {
-    throw new Error("Binary string and bands must have the same length")
-  }
-
-  const notes: Note[] = []
-  let timeline = 0
-
-  for (let i = 0; i < bands.length; i++) {
-    const binaryString = binaryStrings[i]
-    if (!binaryString) throw new Error("Binary string must not be empty")
-
-    let currentNote: Note
-
-    switch (bands[i]) {
-      case BANDS.base: {
-        currentNote = getNote(binaryString, "base", timeline, 1000)
-        break
-      }
-      case BANDS.midrange: {
-        currentNote = getNote(binaryString, "midrange", timeline, 250)
-        break
-      }
-      case BANDS.treble: {
-        currentNote = getNote(binaryString, "treble", timeline, 125)
-        break
-      }
-      default:
-        throw new Error("Invalid band type")
-    }
-
-    notes.push(currentNote)
-    timeline += currentNote.durationMs
-  }
-
-  return notes
-}
-
-function getNote(
-  binaryString: string,
-  band: keyof typeof BANDS,
-  startTimeMs: number,
-  timeOffsetMs: number,
-): Note {
-  const midiBand = MIDI_NOTE_NUMBERS[band]
-  const midiNoteNumber = midiBand[parseInt(binaryString, 2) % midiBand.length]
-  if (midiNoteNumber === undefined) {
-    throw new Error(
-      `Invalid MIDI note number derived from binary string: "${binaryString}" for band: "${band}"`,
-    )
-  }
-
-  const length = binaryString.length
-  const durationMs = length * timeOffsetMs
-
-  let localTimeline = 0
-  const volumeAutomation: Note["volumeAutomation"] = []
-  for (let i = 0; i < length; i++) {
-    volumeAutomation.push({
-      timeOffsetMs: localTimeline,
-      volume: binaryString[i] === "1" ? 0.8 : 0.2,
-    })
-    localTimeline += timeOffsetMs
-  }
-
-  return {
-    midiNoteNumber,
-    startTimeMs,
-    durationMs,
-    volumeAutomation,
+    await writeAudioBufferToWav(audioBuffer, outputFileName)
+    console.log(`Successfully created '${outputFileName}'`)
+  } catch (error) {
+    console.error("Failed to generate or write WAV file:", error)
   }
 }
 
-function getBands(length: number): number[] {
-  const bands: number[] = []
-
-  for (let i = 0; i < length; i++) {
-    bands.push(i % 3) // cycle through 0, 1, 2 for base, midrange, treble
-  }
-
-  return bands
-}
-
-function toBinaryString(str: string): string {
-  const abc = "abcdefghijklmnopqrstuvwxyz"
-  const binary: number[] = []
-
-  for (const chr of str) {
-    if (abc.includes(chr)) {
-      const index = abc.indexOf(chr.toLowerCase())
-      binary.push(index % 2) // convert to binary (0 or 1)
-    } else {
-      binary.push(1)
-    }
-  }
-
-  return binary.join("")
-}
+main()
