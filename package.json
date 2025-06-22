@@ -3,11 +3,10 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target browser --minify",
-    "clean": "rm -rf dist",
     "dev": "bun --watch src/index.ts",
     "format-and-lint": "biome check .",
-    "format-and-lint:fix": "biome check . --write"
+    "format-and-lint:fix": "biome check . --write",
+    "start": "bun src/index.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.0",
