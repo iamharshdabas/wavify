@@ -1,4 +1,4 @@
-import { OfflineAudioContext } from "node-web-audio-api" // Direct import and usage
+import { OfflineAudioContext } from "node-web-audio-api"
 import type { Note } from "./types"
 
 /**
@@ -23,7 +23,7 @@ export async function renderNotesToAudioBuffer(
   )
 
   // An AudioContext uses Nodes to create AudioGraph.
-  // Source Nodes -> Processor Nodes -> Destination Node
+  // Source Nodes -> Processor Nodes -> Destination Node.
   // We are using OscillatorNode for sound generation and GainNode for volume control.
   // TODO: Refactor this to use a more modular approach.
   notes.forEach((note) => {
@@ -32,7 +32,7 @@ export async function renderNotesToAudioBuffer(
     const stopTimeSec = startTimeSec + note.durationMs / 1000
 
     const oscillator = offlineAudioContext.createOscillator()
-    oscillator.type = "sine" // For pure tone, can be "sine", "square", "triangle", or "sawtooth"
+    oscillator.type = "sine" // For pure tone, can be "sine", "square", "triangle", or "sawtooth".
     oscillator.frequency.setValueAtTime(frequency, offlineAudioContext.currentTime + startTimeSec)
 
     const gainNode = offlineAudioContext.createGain()
@@ -41,7 +41,7 @@ export async function renderNotesToAudioBuffer(
     oscillator.connect(gainNode)
     gainNode.connect(offlineAudioContext.destination)
 
-    // For each volume automation point, we set the gain value at the specified time offset
+    // For each volume automation point, we set the gain value at the specified time offset.
     note.volumeAutomation.forEach((automationPoint) => {
       const automationAbsTimeSec = (note.startTimeMs + automationPoint.timeOffsetMs) / 1000
       gainNode.gain.linearRampToValueAtTime(

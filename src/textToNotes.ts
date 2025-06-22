@@ -104,6 +104,11 @@ function getNote(
   }
 }
 
+// TODO: Add more dynamic logic to determine the bands based on input length or content.
+// You can use sentances to create Tempo, Drum, Timeout, etc.
+// Tempo can be determined by the number of characters in the sentances.
+// Drum can be determined by the number of words in the sentances.
+// Timeout can be determined by the length of the sentance.
 function getBands(length: number): number[] {
   const bands: number[] = []
 

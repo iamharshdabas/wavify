@@ -8,9 +8,10 @@ export const MIDI_NOTE_NUMBERS: Record<keyof typeof BANDS, number[]> = {
   treble: [84, 87, 89, 91, 94], // C6, Eb6, F6, G6, Bb6
 }
 
-export const BASE_NOTE_SEGMENT_DURATION_MS = 1000 // Duration of each binary digit for base band
-export const MIDRANGE_NOTE_SEGMENT_DURATION_MS = 250 // Duration of each binary digit for midrange band
-export const TREBLE_NOTE_SEGMENT_DURATION_MS = 125 // Duration of each binary digit for treble band
+// TODO: Using 1000ms for Bass results in buzzy sound.
+export const BASE_NOTE_SEGMENT_DURATION_MS = 1000 // Duration of each binary digit for base band.
+export const MIDRANGE_NOTE_SEGMENT_DURATION_MS = 250 // Duration of each binary digit for midrange band.
+export const TREBLE_NOTE_SEGMENT_DURATION_MS = 125 // Duration of each binary digit for treble band.
 
-export const VOLUME_FOR_ONE = 0.8 // Volume if binary digit is '1'
-export const VOLUME_FOR_ZERO = 0.2 // Volume if binary digit is '0'
+export const VOLUME_FOR_ONE = 0.8 // Volume if binary digit is '1'.
+export const VOLUME_FOR_ZERO = 0.2 // Volume if binary digit is '0'.
