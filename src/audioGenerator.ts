@@ -39,6 +39,7 @@ export async function writeAudioBufferToWav(
     // [Left_Sample_1, Right_Sample_1, Left_Sample_2, Right_Sample_2, ...]
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < numberOfChannels; j++) {
+        // @ts-ignore I dont know how to make this work without ts-ignore.
         interleavedData[i * numberOfChannels + j] = channelData[j][i]
       }
     }
