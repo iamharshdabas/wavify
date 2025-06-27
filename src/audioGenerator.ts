@@ -5,47 +5,16 @@ import * as wav from "wav"
  * @param {AudioBuffer} audioBuffer The AudioBuffer instance containing audio data to write.
  * @param {string} filePath The file system path where the WAV file will be saved.
  */
-export async function writeAudioBufferToWav(
-  audioBuffer: AudioBuffer,
-  filePath: string,
-): Promise<void> {
+export async function writeAudioBufferToWav(audioBuffer: AudioBuffer, filePath: string): Promise<void> {
   try {
-    console.log(`Writing AudioBuffer to WAV: ${filePath}`)
-    console.log(`Channels: ${audioBuffer.numberOfChannels}`)
-    console.log(`Sample Rate: ${audioBuffer.sampleRate}`)
-    console.log(`Length (samples): ${audioBuffer.length}`)
-    console.log(`Duration (seconds): ${audioBuffer.duration}`)
-
     const writer = new wav.FileWriter(filePath, {
+      bitDepth: 16,
       channels: audioBuffer.numberOfChannels,
       sampleRate: audioBuffer.sampleRate,
-      bitDepth: 32, // Using 32-bit because AudioBuffer data is typically float32.
     })
 
-    // Wav FileWriter expects PCM (Pulse Code Modulation) audio data.
-    // Extract the Float32Array for each channel from the AudioBuffer.
-    // Interleave the channel data into a single Float32Array.
-    const numberOfChannels = audioBuffer.numberOfChannels
-    const channelData: Float32Array[] = []
-    for (let i = 0; i < numberOfChannels; i++) {
-      channelData.push(audioBuffer.getChannelData(i))
-    }
-
-    const length = audioBuffer.length
-    const interleavedData = new Float32Array(length * numberOfChannels)
-    // We are first iterating over the samples (length) and then over the channels (numberOfChannels).
-    // We need to interleave the channel data into a single Float32Array.
-    // Wav expects interleaved data in the following order for stereo:
-    //   [Left_Sample_1, Right_Sample_1, Left_Sample_2, Right_Sample_2, ...]
-    for (let i = 0; i < length; i++) {
-      for (let j = 0; j < numberOfChannels; j++) {
-        // @ts-ignore I dont know how to make this work without ts-ignore.
-        interleavedData[i * numberOfChannels + j] = channelData[j][i]
-      }
-    }
-
-    // Convert the Float32Array to a Node.js Buffer as Wav FileWriter expects a Buffer.
-    const pcmBuffer = Buffer.from(interleavedData.buffer)
+    // Wav expects Pulse Code Modulation (PCM) audio data and AudioBuffer contains Float32 data.
+    const pcmBuffer = convertAudioBufferTo16BitPCMBuffer(audioBuffer)
 
     writer.write(pcmBuffer)
     writer.end()
@@ -55,4 +24,49 @@ export async function writeAudioBufferToWav(
     console.error("Error writing WAV file:", error)
     throw error
   }
+}
+
+function convertAudioBufferTo16BitPCMBuffer(audioBuffer: AudioBuffer): Buffer {
+  const numberOfChannels = audioBuffer.numberOfChannels
+  const channelData: Float32Array[] = []
+  for (let i = 0; i < numberOfChannels; i++) {
+    channelData.push(audioBuffer.getChannelData(i))
+  }
+
+  if (!channelData || channelData.length === 0 || !channelData[0]) {
+    return Buffer.alloc(0)
+  }
+
+  const length = channelData[0].length
+  const totalSamples = length * numberOfChannels
+
+  const interleavedData = new Float32Array(totalSamples)
+
+  for (let i = 0; i < length; i++) {
+    for (let j = 0; j < numberOfChannels; j++) {
+      const channelSample = channelData[j]?.[i] ?? 0
+      interleavedData[i * numberOfChannels + j] = channelSample
+    }
+  }
+
+  const pcmData = new Int16Array(totalSamples)
+  const maxInt16Positive = 32767
+  const minInt16Negative = -32768
+
+  for (let i = 0; i < totalSamples; i++) {
+    let val = interleavedData[i]
+
+    // Clamp the value to the -1.0 to 1.0 range
+    val = Math.max(-1, Math.min(1, val ?? 0))
+
+    // Scale to 16-bit integer range
+    // Using explicit min/max values for scaling can be more robust.
+    if (val >= 0) {
+      pcmData[i] = Math.round(val * maxInt16Positive)
+    } else {
+      pcmData[i] = Math.round(val * minInt16Negative)
+    }
+  }
+
+  return Buffer.from(pcmData.buffer)
 }

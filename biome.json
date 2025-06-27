@@ -1,35 +1,43 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": false
+  "$schema": "https://biomejs.dev/schemas/2.0.5/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+        "useSortedAttributes": "on",
+        "useSortedKeys": "on",
+        "useSortedProperties": "on"
+      }
+    },
+    "enabled": true
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "lineWidth": 100
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
+    "lineWidth": 120
   },
   "javascript": {
     "formatter": {
       "semicolons": "asNeeded"
     }
   },
-  "assist": {
+  "linter": {
+    "domains": { "project": "recommended" },
     "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
+    "rules": {
+      "a11y": { "recommended": true },
+      "complexity": { "recommended": true },
+      "correctness": { "recommended": true },
+      "performance": { "recommended": true },
+      "recommended": true,
+      "security": { "recommended": true },
+      "style": { "recommended": true },
+      "suspicious": { "recommended": true }
     }
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }
