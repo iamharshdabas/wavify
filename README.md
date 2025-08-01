@@ -32,13 +32,13 @@ Currently, Wavify focuses on its core functionality:
 ## Why Wavify? 🎵
 
 My journey into Wavify started from a simple pleasure: listening to music while
-I code. I'm particularly drawn to **chill phonk** – its atmospheric vibes,
+I code. I'm particularly drawn to **Angelcore** – its atmospheric vibes,
 distorted basslines, and lo-fi aesthetic keep me in the zone.
 
 Something like [archangel](https://music.youtube.com/watch?v=mkhRRLRUqLY).
 
 I wanted to see if I could create something similar – not necessarily a full
-chill phonk track, but a system that generates interesting, rhythmic, and
+Angelcore track, but a system that generates interesting, rhythmic, and
 layered audio. Wavify is my initial attempt to build a personal musical
 companion, turning the abstract data of text into audible art.
 

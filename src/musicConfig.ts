@@ -4,7 +4,7 @@ export const BANDS = {
   mid: 1,
 }
 
-// Phonk-inspired scales and notes
+// Angelcore inspired scales and notes
 export const MIDI_NOTE_NUMBERS: Record<keyof typeof BANDS, number[]> = {
   bass: [29, 33, 36, 40, 43], // F1, A1, C2, Eb2, F2
   mid: [53, 57, 60, 64, 67], // F5, A5, C6, Eb6, F6
